@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
@@ -9,6 +10,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float speed = 1f;
     [SerializeField] private float jumpSpeed = 5f;
     [SerializeField] private GameObject gc;
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private AudioSource audioSource;
+
+    private float time = 0;
+    private float timeLimit = 0;
 
     private int score = 0;
 
@@ -33,33 +39,50 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        time += Time.deltaTime;
+
+        if(time > timeLimit)
+        {
+            Time.timeScale = 0;
+        }
+
+        scoreText.text = "Score: " + this.score;
+
         ray.origin = this.transform.position;
         ray.direction = playerCamera.transform.forward;
         Debug.DrawRay(ray.origin, ray.direction * rayMaxDistance, Color.green, 0);
         if (Input.GetMouseButtonDown(0))
         {
+            audioSource.Play();
             if (Physics.Raycast(ray, out rayHit, rayMaxDistance))
             {
                 if (rayHit.collider.CompareTag("Target"))
                 {
-                    rayHit.collider.gameObject.GetComponent<Target>().Click();
-                    float distance = Vector3.Distance(rayHit.transform.position, this.transform.position);
-                    if(distance < 30f)
-                    {
-                        this.score++;
+                    Target t = rayHit.collider.gameObject.GetComponent<Target>();
+                    if (!t.GetIsClicked()) { 
+                        t.Click();
+                        float distance = Vector3.Distance(rayHit.transform.position, this.transform.position);
+                        if (distance < 30f)
+                        {
+                            this.score++;
+                        }
+                        else if (distance < 50f)
+                        {
+                            this.score += 2;
+                        }
+                        else if (distance < 70f)
+                        {
+                            this.score += 3;
+                        }
+                        else
+                        {
+                            this.score += 4;
+                        }
                     }
-                    else if(distance < 50f)
-                    {
-                        this.score += 2;
-                    }
-                    else if(distance < 70f)
-                    {
-                        this.score += 3;
-                    }
-                    else
-                    {
-                        this.score += 4;
-                    }
+                }
+                else
+                {
+                    this.score--;
                 }
             }
         }

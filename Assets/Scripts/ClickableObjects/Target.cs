@@ -5,6 +5,7 @@ using UnityEngine;
 public class Target : ClickableObject
 {
     [SerializeField] private MeshRenderer mesh;
+    private bool isClicked = false;
 
     private void Start()
     {
@@ -14,5 +15,10 @@ public class Target : ClickableObject
     {
         mesh.material.color = Color.red;
         Destroy(this.gameObject, 1f);
+    }
+
+    public bool GetIsClicked()
+    {
+        return this.isClicked;
     }
 }
