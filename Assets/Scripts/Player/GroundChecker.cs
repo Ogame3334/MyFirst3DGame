@@ -5,15 +5,6 @@ using UnityEngine;
 public class GroundChecker : MonoBehaviour
 {
     private bool isGrounded;
-    void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-        Debug.Log(isGrounded);
-    }
 
     public bool GetIsGrounded()
     {
@@ -23,11 +14,9 @@ public class GroundChecker : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         isGrounded = true;
-        Debug.Log("Enter");
     }
     private void OnTriggerExit(Collider other)
     {
         isGrounded = false;
-        Debug.Log("Exit");
     }
 }
