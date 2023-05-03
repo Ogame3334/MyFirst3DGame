@@ -7,6 +7,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Rigidbody playerRB;
     [SerializeField] private GameObject playerCamera;
     [SerializeField] private float speed = 1f;
+    [SerializeField] private float jumpSpeed = 5f;
+    [SerializeField] private GameObject gc;
+    private GroundChecker groundChecker;
     private Vector2 sensitivity = new Vector2(3f, 3f);
     private Quaternion cameraRot, characterRot;
     private float minY = -90f;
@@ -17,6 +20,7 @@ public class PlayerController : MonoBehaviour
     {
         cameraRot = playerCamera.transform.localRotation;
         characterRot = this.transform.localRotation;
+        groundChecker = gc.GetComponent<GroundChecker>();
     }
 
     private void Update()
@@ -36,6 +40,11 @@ public class PlayerController : MonoBehaviour
 
     private void MoveInput()
     {
+        if (Input.GetAxis("Jump") != 0 & groundChecker.GetIsGrounded())
+        {
+            playerRB.velocity = new Vector3(playerRB.velocity.x, Input.GetAxis("Jump") * jumpSpeed, playerRB.velocity.z);
+        }
+
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
@@ -43,13 +52,6 @@ public class PlayerController : MonoBehaviour
         Vector3 comFoward = new Vector3(playerCamera.transform.forward.x, 0, playerCamera.transform.forward.z).normalized;
         Vector3 pos = comFoward * z + playerCamera.transform.right * x;
         transform.position += pos * speed * Time.deltaTime;
-    }
-    Vector3 CalcVelocity()
-    {
-        float x = Input.GetAxisRaw("Horizontal") * speed;
-        float z = Input.GetAxisRaw("Vertical") * speed;
-
-        return new Vector3();
     }
     private void CameraInput()
     {
