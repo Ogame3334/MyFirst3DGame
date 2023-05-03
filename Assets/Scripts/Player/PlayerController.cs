@@ -9,11 +9,18 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float speed = 1f;
     [SerializeField] private float jumpSpeed = 5f;
     [SerializeField] private GameObject gc;
+
+    private int score = 0;
+
     private GroundChecker groundChecker;
+    private Ray ray;
+    private RaycastHit rayHit;
     private Vector2 sensitivity = new Vector2(3f, 3f);
     private Quaternion cameraRot, characterRot;
     private float minY = -90f;
     private float maxY = 90f;
+
+    private float rayMaxDistance = 90f;
 
     private bool cursorLock = true;
     private void Start()
@@ -21,10 +28,41 @@ public class PlayerController : MonoBehaviour
         cameraRot = playerCamera.transform.localRotation;
         characterRot = this.transform.localRotation;
         groundChecker = gc.GetComponent<GroundChecker>();
+        ray = new Ray(this.transform.position, new Vector3(playerCamera.transform.forward.x, 0, playerCamera.transform.forward.z));
     }
 
     private void Update()
     {
+        ray.origin = this.transform.position;
+        ray.direction = playerCamera.transform.forward;
+        Debug.DrawRay(ray.origin, ray.direction * rayMaxDistance, Color.green, 0);
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (Physics.Raycast(ray, out rayHit, rayMaxDistance))
+            {
+                if (rayHit.collider.CompareTag("Target"))
+                {
+                    rayHit.collider.gameObject.GetComponent<Target>().Click();
+                    float distance = Vector3.Distance(rayHit.transform.position, this.transform.position);
+                    if(distance < 30f)
+                    {
+                        this.score++;
+                    }
+                    else if(distance < 50f)
+                    {
+                        this.score += 2;
+                    }
+                    else if(distance < 70f)
+                    {
+                        this.score += 3;
+                    }
+                    else
+                    {
+                        this.score += 4;
+                    }
+                }
+            }
+        }
         if (cursorLock)
         {
             CameraInput();
@@ -48,7 +86,6 @@ public class PlayerController : MonoBehaviour
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
-        //playerRB.velocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")) * speed + new Vector3(0, playerRB.velocity.y, 0) ;
         Vector3 comFoward = new Vector3(playerCamera.transform.forward.x, 0, playerCamera.transform.forward.z).normalized;
         Vector3 pos = comFoward * z + playerCamera.transform.right * x;
         transform.position += pos * speed * Time.deltaTime;
